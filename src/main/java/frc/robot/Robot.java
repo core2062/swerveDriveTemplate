@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,7 +20,10 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
 
-  private String m_autoSlected;
+  private static final String kDefaultAuto = "Do Nothing";
+  private static final String kMoveAuto = "Move Auto";
+
+  private String m_autoSelected;
   private String m_speedSelected;
 
   private static final String compSpeed = "Comp Motor Speed";
@@ -27,6 +32,7 @@ public class Robot extends TimedRobot {
   private final SendableChooser<String> m_autoChooser = new SendableChooser<>();
   private final SendableChooser<String> m_driveSpeedchooser = new SendableChooser<>();
 
+  Compressor phCompressor = new Compressor(3, PneumaticsModuleType.REVPH);
   public static CTREConfigs ctreConfigs;
 
   private Command m_autonomousCommand;
@@ -40,9 +46,12 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     
-    //m_autoChooser.setDeafaultOption();
-    //SmartDashboard.putData("Auto choices", m_autoChooser);
+    //setup for auton selection on driver station
+    m_autoChooser.setDefaultOption("Do Nothing", kDefaultAuto);
+    m_autoChooser.addOption("Move Auto", kMoveAuto);
+    SmartDashboard.putData("Auto choices", m_autoChooser);
 
+    //setup for drive speed on driver station
     m_driveSpeedchooser.setDefaultOption("Set Demo Speed", demoSpeed);
     m_driveSpeedchooser.addOption("Set Comp Speed", compSpeed);
     SmartDashboard.putData("Speed chooser", m_driveSpeedchooser);
@@ -79,6 +88,23 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    System.out.println("Autos intilized");
+
+    m_autoSelected = m_autoChooser.getSelected();
+    switch (m_autoSelected) {
+      case kDefaultAuto:
+        Constants.AutoSelected = 100;
+        System.out.println("Autos Default");
+        break;
+      case kMoveAuto:
+        Constants.AutoSelected = 0;
+        System.out.println("Movement");
+        break;
+      default:
+        System.out.println("default auto Movement");
+        Constants.AutoSelected = 10;
+        break;
+    }
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
